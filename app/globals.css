@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+/* ─── Nexvolt Design System — DARK (default) ─── */
+
+@theme {
+  /* Background */
+  --color-nx-bg: #0A0A0F;
+  --color-nx-surface: #111827;
+  --color-nx-surface-hover: #1a2235;
+  --color-nx-card: #0f1623;
+
+  /* Border */
+  --color-nx-border: #1F2937;
+  --color-nx-border-hover: #374151;
+
+  /* Primary — Electric Blue */
+  --color-nx-primary: #0EA5E9;
+  --color-nx-primary-dim: #0284C7;
+  --color-nx-primary-bg: rgba(14, 165, 233, 0.08);
+  --color-nx-primary-ring: rgba(14, 165, 233, 0.3);
+
+  /* Accent — Neon Green */
+  --color-nx-accent: #10B981;
+  --color-nx-accent-dim: #059669;
+  --color-nx-accent-bg: rgba(16, 185, 129, 0.08);
+
+  /* Semantic */
+  --color-nx-danger: #EF4444;
+  --color-nx-danger-bg: rgba(239, 68, 68, 0.08);
+  --color-nx-warning: #F59E0B;
+  --color-nx-warning-bg: rgba(245, 158, 11, 0.08);
+
+  /* Text */
+  --color-nx-text: #F9FAFB;
+  --color-nx-text-secondary: #9CA3AF;
+  --color-nx-text-muted: #6B7280;
+
+  /* Font */
+  --font-sans: var(--font-inter);
+
+  /* Shadows */
+  --shadow-glow-primary: 0 0 20px rgba(14, 165, 233, 0.15);
+  --shadow-glow-accent: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+/* ─── LIGHT theme ─── */
+
+[data-theme="light"] {
+  --color-nx-bg: #F8FAFC;
+  --color-nx-surface: #FFFFFF;
+  --color-nx-surface-hover: #F1F5F9;
+  --color-nx-card: #FFFFFF;
+
+  --color-nx-border: #E2E8F0;
+  --color-nx-border-hover: #CBD5E1;
+
+  --color-nx-primary: #0284C7;
+  --color-nx-primary-dim: #0369A1;
+  --color-nx-primary-bg: rgba(2, 132, 199, 0.06);
+  --color-nx-primary-ring: rgba(2, 132, 199, 0.25);
+
+  --color-nx-accent: #059669;
+  --color-nx-accent-dim: #047857;
+  --color-nx-accent-bg: rgba(5, 150, 105, 0.06);
+
+  --color-nx-danger: #DC2626;
+  --color-nx-danger-bg: rgba(220, 38, 38, 0.06);
+  --color-nx-warning: #D97706;
+  --color-nx-warning-bg: rgba(217, 119, 6, 0.06);
+
+  --color-nx-text: #0F172A;
+  --color-nx-text-secondary: #475569;
+  --color-nx-text-muted: #94A3B8;
+
+  --shadow-glow-primary: 0 0 20px rgba(2, 132, 199, 0.08);
+  --shadow-glow-accent: 0 0 20px rgba(5, 150, 105, 0.08);
+}
+
+/* ─── MIDNIGHT theme (deep blue) ─── */
+
+[data-theme="midnight"] {
+  --color-nx-bg: #020617;
+  --color-nx-surface: #0F172A;
+  --color-nx-surface-hover: #1E293B;
+  --color-nx-card: #0B1120;
+
+  --color-nx-border: #1E293B;
+  --color-nx-border-hover: #334155;
+
+  --color-nx-primary: #38BDF8;
+  --color-nx-primary-dim: #0EA5E9;
+  --color-nx-primary-bg: rgba(56, 189, 248, 0.08);
+  --color-nx-primary-ring: rgba(56, 189, 248, 0.3);
+
+  --color-nx-accent: #34D399;
+  --color-nx-accent-dim: #10B981;
+  --color-nx-accent-bg: rgba(52, 211, 153, 0.08);
+
+  --color-nx-danger: #F87171;
+  --color-nx-danger-bg: rgba(248, 113, 113, 0.08);
+  --color-nx-warning: #FBBF24;
+  --color-nx-warning-bg: rgba(251, 191, 36, 0.08);
+
+  --color-nx-text: #F1F5F9;
+  --color-nx-text-secondary: #94A3B8;
+  --color-nx-text-muted: #64748B;
+
+  --shadow-glow-primary: 0 0 24px rgba(56, 189, 248, 0.2);
+  --shadow-glow-accent: 0 0 24px rgba(52, 211, 153, 0.2);
+}
+
+/* ─── Base ─── */
+
+body {
+  background-color: var(--color-nx-bg);
+  color: var(--color-nx-text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ─── Scrollbar ─── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-nx-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-nx-border-hover);
+}
+
+/* ─── Grid background for login ─── */
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(14, 165, 233, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* ─── Glow effects ─── */
+
+.glow-primary {
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.glow-accent {
+  box-shadow: var(--shadow-glow-accent);
+}
+
+/* ─── Chart colors for light theme ─── */
+
+[data-theme="light"] .recharts-cartesian-grid line {
+  stroke: #E2E8F0 !important;
+}
+
+[data-theme="light"] .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
