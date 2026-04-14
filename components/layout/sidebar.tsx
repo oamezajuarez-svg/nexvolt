@@ -16,6 +16,7 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeft,
+  Plus,
 } from "lucide-react";
 
 const navItems = [
@@ -50,6 +51,20 @@ export function Sidebar() {
       >
         <Logo collapsed={collapsed} />
       </Link>
+
+      {/* New pilot button */}
+      <div className={cn("px-2 pt-4 pb-2", collapsed && "px-1.5")}>
+        <Link
+          href="/clientes/nuevo"
+          className={cn(
+            "flex items-center gap-2 rounded-lg bg-nx-primary text-white text-xs font-medium transition-all hover:bg-nx-primary-dim",
+            collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5"
+          )}
+        >
+          <Plus className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Nuevo Piloto</span>}
+        </Link>
+      </div>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">

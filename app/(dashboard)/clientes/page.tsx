@@ -1,8 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Building2, Search, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import { Building2, Search, ArrowUpRight, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { mockClients } from "@/lib/mock-data";
 import { formatCurrency } from "@/lib/utils";
@@ -39,7 +41,14 @@ export default function ClientesPage() {
             {t("clients.subtitle")}
           </p>
         </div>
-        <Badge variant="primary">{mockClients.length} {t("clients.total")}</Badge>
+        <div className="flex items-center gap-3">
+          <Badge variant="primary">{mockClients.length} {t("clients.total")}</Badge>
+          <Link href="/clientes/nuevo">
+            <Button variant="primary" size="sm">
+              <Plus className="h-3.5 w-3.5" /> Nuevo Cliente
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search */}
