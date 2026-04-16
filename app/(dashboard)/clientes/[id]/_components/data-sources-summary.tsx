@@ -1,17 +1,28 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   FileText,
   Radio,
   AlertTriangle,
   Lightbulb,
   BarChart3,
+  Zap,
+  Loader2,
 } from "lucide-react";
-import { client } from "./shared/config";
+import { useClientData } from "./shared/client-data-context";
+import { runAnalysis } from "@/lib/engine/analyze";
 
 export function DataSourcesSummary() {
+  const { client, orgId } = useClientData();
+  const router = useRouter();
+  const [analyzing, setAnalyzing] = useState(false);
+  const [result, setResult] = useState<{ anomalyCount: number; solutionCount: number } | null>(null);
+
   const invoiceCount = client.invoices.length;
   const firstPeriod = client.invoices[0]?.period || "—";
   const lastPeriod = client.invoices[invoiceCount - 1]?.period || "—";
@@ -64,17 +75,19 @@ export function DataSourcesSummary() {
 
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Radio className="h-4 w-4 text-nx-accent" />
+              <Radio className={`h-4 w-4 ${deviceCount > 0 ? "text-nx-accent" : "text-nx-warning"}`} />
               <p className="text-xs font-semibold text-nx-text">Monitoreo en vivo</p>
             </div>
-            <p className="text-2xl font-bold text-nx-accent">{deviceCount}</p>
+            <p className={`text-2xl font-bold ${deviceCount > 0 ? "text-nx-accent" : "text-nx-warning"}`}>{deviceCount}</p>
             <p className="text-[11px] text-nx-text-secondary mt-1">
-              {onlineDevices}/{deviceCount} dispositivos en linea
+              {deviceCount > 0
+                ? `${onlineDevices}/${deviceCount} dispositivos en linea`
+                : "Sin hardware instalado"}
             </p>
             <p className="text-[11px] text-nx-text-muted mt-0.5">
               {deviceCount > 0
                 ? `Modelos: ${[...new Set(client.monitoring_devices.map((d) => d.model))].join(", ")}`
-                : "Sin dispositivos instalados"}
+                : "Armonicos, voltaje y desbalance no detectables"}
             </p>
           </div>
 
@@ -108,6 +121,56 @@ export function DataSourcesSummary() {
             </p>
           </div>
         </div>
+
+        {/* Analyze button */}
+        {invoiceCount >= 3 && orgId !== "demo" && (
+          <div className="mt-4 rounded-lg bg-nx-primary/5 border border-nx-primary/20 px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-nx-text">
+                {anomalyCount === 0
+                  ? `${invoiceCount} recibos listos para analizar`
+                  : "Re-ejecutar analisis con datos actualizados"}
+              </p>
+              <p className="text-[11px] text-nx-text-muted mt-0.5">
+                El motor analiza factor de potencia, demanda, consumo y costos para detectar anomalias y recomendar soluciones
+              </p>
+            </div>
+            <Button
+              size="md"
+              disabled={analyzing}
+              onClick={async () => {
+                setAnalyzing(true);
+                setResult(null);
+                const res = await runAnalysis(orgId);
+                setResult({ anomalyCount: res.anomalyCount, solutionCount: res.solutionCount });
+                setAnalyzing(false);
+                if (!res.error) {
+                  router.refresh();
+                }
+              }}
+            >
+              {analyzing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analizando...
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4" />
+                  Ejecutar analisis
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+
+        {result && (
+          <div className="mt-3 rounded-lg bg-nx-accent/10 border border-nx-accent/20 px-4 py-2.5">
+            <p className="text-xs text-nx-accent font-medium">
+              Analisis completado: {result.anomalyCount} anomalias detectadas, {result.solutionCount} soluciones generadas
+            </p>
+          </div>
+        )}
 
         <div className="mt-4 rounded-lg bg-nx-surface/50 border border-nx-border px-4 py-3">
           <p className="text-[11px] text-nx-text-muted leading-relaxed">

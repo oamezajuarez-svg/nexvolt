@@ -16,7 +16,7 @@ import {
 } from "@/lib/mock-equipment";
 import { calculateEquipmentConsumption } from "@/lib/calculations/energy-balance";
 import { ILLUMINATION_LEVELS } from "@/lib/standards/illumination";
-import { client } from "../shared/config";
+import { useClientData } from "../shared/client-data-context";
 import type {
   Equipment,
   MotorEquipment,
@@ -403,6 +403,8 @@ function OtherTable() {
 
 // ─── Summary sub-tab ───
 function SummaryView() {
+  const { client } = useClientData();
+
   const allSummaries = useMemo(() => {
     return mockEquipment.map((eq) => ({
       eq,

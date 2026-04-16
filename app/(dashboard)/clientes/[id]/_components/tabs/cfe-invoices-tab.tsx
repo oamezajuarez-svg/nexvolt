@@ -18,19 +18,22 @@ import {
   ComposedChart,
   ReferenceLine,
 } from "recharts";
-import {
-  client,
-  consumptionBreakdown,
-  demandData,
-  pfData,
-  tooltipStyle,
-  totalAnnualCost,
-  avgPF,
-  totalPFPenalty,
-  maxDemand,
-} from "../shared/config";
+import { useClientData } from "../shared/client-data-context";
+import { useComputedData } from "../shared/use-computed";
+import { tooltipStyle } from "../shared/config";
 
 export function CFESection() {
+  const { client } = useClientData();
+  const {
+    consumptionBreakdown,
+    demandData,
+    pfData,
+    totalAnnualCost,
+    avgPF,
+    totalPFPenalty,
+    maxDemand,
+  } = useComputedData();
+
   const firstP = client.invoices[0]?.period || "—";
   const lastP = client.invoices[client.invoices.length - 1]?.period || "—";
 

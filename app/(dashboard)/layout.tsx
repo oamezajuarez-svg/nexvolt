@@ -3,6 +3,7 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { SidebarProvider, useSidebar } from "@/lib/sidebar-context";
+import { AuthProvider } from "@/lib/auth-context";
 
 function DashboardShell({ children }: { children: React.ReactNode }) {
   const { collapsed } = useSidebar();
@@ -28,8 +29,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
-      <DashboardShell>{children}</DashboardShell>
-    </SidebarProvider>
+    <AuthProvider>
+      <SidebarProvider>
+        <DashboardShell>{children}</DashboardShell>
+      </SidebarProvider>
+    </AuthProvider>
   );
 }

@@ -4,49 +4,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 import { CheckCircle2, Wrench } from "lucide-react";
+import { useClientData } from "../shared/client-data-context";
 import {
-  client,
   solutionTypeConfig,
   urgencyConfig,
   urgencyOrder,
   solEffects,
 } from "../shared/config";
-
-function computeSimulatedBill(activeIds: Set<string>) {
-  const n = client.invoices.length;
-  let avgEnergy = Math.round(client.invoices.reduce((s, i) => s + i.cost_energy, 0) / n);
-  let avgDemandCost = Math.round(client.invoices.reduce((s, i) => s + i.cost_demand, 0) / n);
-  let avgDist = Math.round(client.invoices.reduce((s, i) => s + i.cost_distribution + i.cost_transmission, 0) / n);
-  let avgDemandKw = Math.round(client.invoices.reduce((s, i) => s + i.demand_max_kw, 0) / n);
-  let pf = client.invoices.reduce((s, i) => s + i.power_factor, 0) / n;
-  const avgKwh = Math.round(client.invoices.reduce((s, i) => s + i.total_kwh, 0) / n);
-  const demandRate = avgDemandCost / avgDemandKw;
-
-  // Apply effects
-  for (const id of activeIds) {
-    const fx = solEffects[id];
-    if (!fx) continue;
-    if (fx.pfOverride && fx.pfOverride > pf) pf = fx.pfOverride;
-    if (fx.demandCutKw) {
-      avgDemandKw = Math.max(client.contracted_demand_kw, avgDemandKw - fx.demandCutKw);
-      avgDemandCost = Math.round(avgDemandKw * demandRate);
-    }
-    if (fx.energyPct) avgEnergy = Math.round(avgEnergy * fx.energyPct);
-    if (fx.demandCostPct) avgDemandCost = Math.round(avgDemandCost * fx.demandCostPct);
-    if (fx.distPct) avgDist = Math.round(avgDist * fx.distPct);
-  }
-
-  const base = avgEnergy + avgDemandCost + avgDist;
-  let costPF: number;
-  if (pf >= 0.90) {
-    costPF = -Math.round(base * (1 - 0.90 / pf));
-  } else {
-    costPF = Math.round(base * ((0.90 / pf) - 1));
-  }
-  const sub = base + costPF;
-  const iva = Math.round(sub * 0.16);
-  return { avgEnergy, avgDemandCost, avgDist, costPF, pf, sub, iva, total: sub + iva, avgDemandKw, avgKwh };
-}
 
 export function SimulatorSection({
   selected,
@@ -55,6 +19,44 @@ export function SimulatorSection({
   selected: Set<string>;
   setSelected: React.Dispatch<React.SetStateAction<Set<string>>>;
 }) {
+  const { client } = useClientData();
+
+  function computeSimulatedBill(activeIds: Set<string>) {
+    const n = client.invoices.length;
+    let avgEnergy = Math.round(client.invoices.reduce((s, i) => s + i.cost_energy, 0) / n);
+    let avgDemandCost = Math.round(client.invoices.reduce((s, i) => s + i.cost_demand, 0) / n);
+    let avgDist = Math.round(client.invoices.reduce((s, i) => s + i.cost_distribution + i.cost_transmission, 0) / n);
+    let avgDemandKw = Math.round(client.invoices.reduce((s, i) => s + i.demand_max_kw, 0) / n);
+    let pf = client.invoices.reduce((s, i) => s + i.power_factor, 0) / n;
+    const avgKwh = Math.round(client.invoices.reduce((s, i) => s + i.total_kwh, 0) / n);
+    const demandRate = avgDemandCost / avgDemandKw;
+
+    // Apply effects
+    for (const id of activeIds) {
+      const fx = solEffects[id];
+      if (!fx) continue;
+      if (fx.pfOverride && fx.pfOverride > pf) pf = fx.pfOverride;
+      if (fx.demandCutKw) {
+        avgDemandKw = Math.max(client.contracted_demand_kw, avgDemandKw - fx.demandCutKw);
+        avgDemandCost = Math.round(avgDemandKw * demandRate);
+      }
+      if (fx.energyPct) avgEnergy = Math.round(avgEnergy * fx.energyPct);
+      if (fx.demandCostPct) avgDemandCost = Math.round(avgDemandCost * fx.demandCostPct);
+      if (fx.distPct) avgDist = Math.round(avgDist * fx.distPct);
+    }
+
+    const base = avgEnergy + avgDemandCost + avgDist;
+    let costPF: number;
+    if (pf >= 0.90) {
+      costPF = -Math.round(base * (1 - 0.90 / pf));
+    } else {
+      costPF = Math.round(base * ((0.90 / pf) - 1));
+    }
+    const sub = base + costPF;
+    const iva = Math.round(sub * 0.16);
+    return { avgEnergy, avgDemandCost, avgDist, costPF, pf, sub, iva, total: sub + iva, avgDemandKw, avgKwh };
+  }
+
   const toggle = (id: string) => {
     const next = new Set(selected);
     if (next.has(id)) next.delete(id);

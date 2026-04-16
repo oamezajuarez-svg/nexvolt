@@ -33,33 +33,14 @@ import {
   calculateCertificationReadiness,
   calculateEnvironmentalImpact,
 } from "@/lib/calculations/benefits";
+import { useClientData } from "../shared/client-data-context";
+import { useComputedData } from "../shared/use-computed";
 import {
-  client,
   severityConfig,
   urgencyConfig,
   solutionTypeConfig,
-  totalAnnualCost,
-  avgMonthly,
-  avgPF,
-  totalPFPenalty,
-  totalAnomalyImpact,
-  totalPotentialSavings,
-  maxDemand,
-  demandExceedCount,
-  sortedSolutions,
   tooltipStyle,
 } from "../shared/config";
-
-// Build full client detail for calculations
-const fullClient: ClientDetail = {
-  ...client,
-  plant_profile: mockPlantProfile,
-  equipment: mockEquipment,
-};
-
-const auditProgress = calculateAuditProgress(fullClient);
-const certReadiness = calculateCertificationReadiness(fullClient);
-const envImpact = calculateEnvironmentalImpact(client.invoices, client.proposed_solutions);
 
 const stepStatusColor: Record<string, string> = {
   complete: "bg-nx-accent border-nx-accent",
@@ -74,6 +55,30 @@ const stepTextColor: Record<string, string> = {
 };
 
 export function OverviewSection() {
+  const { client } = useClientData();
+  const {
+    totalAnnualCost,
+    avgMonthly,
+    avgPF,
+    totalPFPenalty,
+    totalAnomalyImpact,
+    totalPotentialSavings,
+    maxDemand,
+    demandExceedCount,
+    sortedSolutions,
+  } = useComputedData();
+
+  // Build full client detail for calculations
+  const fullClient: ClientDetail = {
+    ...client,
+    plant_profile: mockPlantProfile,
+    equipment: mockEquipment,
+  };
+
+  const auditProgress = calculateAuditProgress(fullClient);
+  const certReadiness = calculateCertificationReadiness(fullClient);
+  const envImpact = calculateEnvironmentalImpact(client.invoices, client.proposed_solutions);
+
   return (
     <div className="space-y-6">
       {/* Audit progress stepper */}

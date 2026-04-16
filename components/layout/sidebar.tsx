@@ -17,17 +17,19 @@ import {
   PanelLeftClose,
   PanelLeft,
   Plus,
+  FileText,
 } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", i18nKey: "nav.dashboard", icon: LayoutDashboard },
+  { href: "/recibos", label: "Recibos CFE", icon: FileText },
   { href: "/clientes", i18nKey: "nav.clients", icon: Building2 },
   { href: "/auditorias", i18nKey: "nav.audits", icon: ClipboardCheck },
   { href: "/proyectos", i18nKey: "nav.projects", icon: FolderKanban },
   { href: "/monitoreo", i18nKey: "nav.monitoring", icon: Activity },
   { href: "/reportes", i18nKey: "nav.reports", icon: FileBarChart },
   { href: "/configuracion", i18nKey: "nav.settings", icon: Settings },
-];
+] as const;
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -70,11 +72,12 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
         {navItems.map((item) => {
           const active = pathname.startsWith(item.href);
+          const displayLabel = "label" in item ? item.label : t(item.i18nKey);
           return (
             <Link
               key={item.href}
               href={item.href}
-              title={collapsed ? t(item.i18nKey) : undefined}
+              title={collapsed ? displayLabel : undefined}
               className={cn(
                 "flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200",
                 collapsed
@@ -87,7 +90,7 @@ export function Sidebar() {
             >
               <item.icon className="h-4 w-4 shrink-0" />
               {!collapsed && (
-                <span className="truncate">{t(item.i18nKey)}</span>
+                <span className="truncate">{displayLabel}</span>
               )}
             </Link>
           );

@@ -28,20 +28,25 @@ import {
   Cell,
 } from "recharts";
 import type { SolutionUrgency, SolutionImpact } from "@/lib/types";
+import { useClientData } from "../shared/client-data-context";
+import { useComputedData } from "../shared/use-computed";
 import {
-  client,
   severityConfig,
   urgencyConfig,
   impactConfig,
   solutionTypeConfig,
-  totalPotentialSavings,
-  totalInvestment,
-  totalCO2,
-  sortedSolutions,
   tooltipStyle,
 } from "../shared/config";
 
 export function SolutionsSection() {
+  const { client } = useClientData();
+  const {
+    totalPotentialSavings,
+    totalInvestment,
+    totalCO2,
+    sortedSolutions,
+  } = useComputedData();
+
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Group by urgency

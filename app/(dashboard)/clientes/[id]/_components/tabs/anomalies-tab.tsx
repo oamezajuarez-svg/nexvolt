@@ -11,13 +11,14 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import type { AnomalySeverity, AnomalySource } from "@/lib/types";
-import {
-  client,
-  severityConfig,
-  totalAnomalyImpact,
-} from "../shared/config";
+import { useClientData } from "../shared/client-data-context";
+import { useComputedData } from "../shared/use-computed";
+import { severityConfig } from "../shared/config";
 
 export function AnomaliesSection() {
+  const { client } = useClientData();
+  const { totalAnomalyImpact } = useComputedData();
+
   const [filter, setFilter] = useState<"all" | AnomalySource>("all");
   const filtered = client.anomalies.filter((a) => filter === "all" || a.source === filter);
   const cfeCount = client.anomalies.filter((a) => a.source === "cfe").length;

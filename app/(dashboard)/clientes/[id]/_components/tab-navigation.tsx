@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { client } from "./shared/config";
+import { useClientData } from "./shared/client-data-context";
 import { sections, type SectionId } from "./shared/types";
 
 export function TabNavigation({
@@ -13,6 +13,8 @@ export function TabNavigation({
   setSection: (id: SectionId) => void;
   selectedSolsCount: number;
 }) {
+  const { client } = useClientData();
+
   return (
     <div className="flex gap-1 border-b border-nx-border overflow-x-auto">
       {sections.map((s) => (

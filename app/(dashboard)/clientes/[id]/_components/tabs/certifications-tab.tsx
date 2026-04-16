@@ -15,7 +15,7 @@ import {
   calculateEnvironmentalImpact,
   calculateFinancialProjection,
 } from "@/lib/calculations/benefits";
-import { client } from "../shared/config";
+import { useClientData } from "../shared/client-data-context";
 import type { ClientDetail, CertificationItem } from "@/lib/types";
 import {
   AreaChart,
@@ -72,6 +72,8 @@ function CertChecklist({ items }: { items: CertificationItem[] }) {
 }
 
 export function CertificationsSection() {
+  const { client } = useClientData();
+
   // Build a temporary full ClientDetail to pass to calculation functions
   const fullClient: ClientDetail = useMemo(
     () => ({
@@ -79,7 +81,7 @@ export function CertificationsSection() {
       equipment: mockEquipment,
       plant_profile: mockPlantProfile,
     }),
-    []
+    [client]
   );
 
   const certs = useMemo(
@@ -88,20 +90,20 @@ export function CertificationsSection() {
   );
   const fiscalBenefits = useMemo(
     () => calculateFiscalBenefits(client.proposed_solutions),
-    []
+    [client.proposed_solutions]
   );
   const envImpact = useMemo(
     () => calculateEnvironmentalImpact(client.invoices, client.proposed_solutions),
-    []
+    [client.invoices, client.proposed_solutions]
   );
   const projection = useMemo(
     () => calculateFinancialProjection(client.proposed_solutions),
-    []
+    [client.proposed_solutions]
   );
 
   return (
     <div className="space-y-8">
-      {/* ═══════ Section 1: Certificaciones ═══════ */}
+      {/* Section 1: Certificaciones */}
       <div>
         <SectionHeader
           title="Certificaciones"
@@ -174,7 +176,7 @@ export function CertificationsSection() {
         </div>
       </div>
 
-      {/* ═══════ Section 2: Beneficios Fiscales ═══════ */}
+      {/* Section 2: Beneficios Fiscales */}
       <div>
         <SectionHeader
           title="Beneficios Fiscales"
@@ -205,7 +207,7 @@ export function CertificationsSection() {
         </div>
       </div>
 
-      {/* ═══════ Section 3: Impacto Ambiental ═══════ */}
+      {/* Section 3: Impacto Ambiental */}
       <div>
         <SectionHeader
           title="Impacto Ambiental"
@@ -249,7 +251,7 @@ export function CertificationsSection() {
         </div>
       </div>
 
-      {/* ═══════ Section 4: Proyeccion Financiera ═══════ */}
+      {/* Section 4: Proyeccion Financiera */}
       <div>
         <SectionHeader
           title="Proyeccion Financiera"

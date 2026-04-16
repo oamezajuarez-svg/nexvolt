@@ -6,16 +6,11 @@ import {
   LampDesk,
   Zap,
 } from "lucide-react";
-import { mockClientDetail } from "@/lib/mock-client-detail";
 import type {
   AnomalySeverity,
   SolutionUrgency,
   SolutionImpact,
 } from "@/lib/types";
-
-// ─── Client ───
-
-export const client = mockClientDetail;
 
 // ─── Config objects ───
 
@@ -89,44 +84,6 @@ export const solutionTypeConfig: Record<
   },
 };
 
-// ─── Computed data ───
-
-export const totalAnnualCost = client.invoices.reduce((sum, inv) => sum + inv.total_cost, 0);
-export const avgMonthly = totalAnnualCost / 12;
-export const avgPF =
-  client.invoices.reduce((sum, inv) => sum + inv.power_factor, 0) / client.invoices.length;
-export const totalPFPenalty = client.invoices.reduce((sum, inv) => sum + inv.cost_power_factor, 0);
-export const totalAnomalyImpact = client.anomalies
-  .filter((a) => a.status === "active")
-  .reduce((sum, a) => sum + a.financial_impact_monthly, 0);
-export const totalPotentialSavings = client.proposed_solutions.reduce(
-  (sum, s) => sum + s.annual_savings,
-  0
-);
-export const maxDemand = Math.max(...client.invoices.map((i) => i.demand_max_kw));
-export const demandExceedCount = client.invoices.filter(
-  (i) => i.demand_max_kw > client.contracted_demand_kw
-).length;
-
-export const consumptionBreakdown = client.invoices.map((inv) => ({
-  period: inv.period.slice(0, 3),
-  base: inv.consumption_base_kwh,
-  intermedia: inv.consumption_intermedia_kwh,
-  punta: inv.consumption_punta_kwh,
-}));
-
-export const demandData = client.invoices.map((inv) => ({
-  period: inv.period.slice(0, 3),
-  max: inv.demand_max_kw,
-  contracted: client.contracted_demand_kw,
-}));
-
-export const pfData = client.invoices.map((inv) => ({
-  period: inv.period.slice(0, 3),
-  pf: inv.power_factor,
-  penalty: inv.power_factor_penalty_pct,
-}));
-
 export const tooltipStyle = {
   backgroundColor: "#111827",
   border: "1px solid #1F2937",
@@ -141,15 +98,6 @@ export const urgencyOrder: Record<SolutionUrgency, number> = {
   short_term: 1,
   medium_term: 2,
 };
-export const sortedSolutions = [...client.proposed_solutions].sort(
-  (a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency] || a.roi_months - b.roi_months
-);
-export const totalInvestment = client.proposed_solutions.reduce((s, sol) => s + sol.investment, 0);
-export const totalMonthlySavings = client.proposed_solutions.reduce(
-  (s, sol) => s + sol.monthly_savings,
-  0
-);
-export const totalCO2 = client.proposed_solutions.reduce((s, sol) => s + sol.co2_reduction_tons, 0);
 
 // Simulator effects
 export const solEffects: Record<string, {

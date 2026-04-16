@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Radio, CircleDot } from "lucide-react";
+import { Radio, CircleDot, ShieldCheck, Zap, BarChart3, AlertTriangle, Activity } from "lucide-react";
 import { mockLive24h } from "@/lib/mock-client-detail";
 import {
   Area,
@@ -15,10 +15,150 @@ import {
   ComposedChart,
   ReferenceLine,
 } from "recharts";
-import { client, tooltipStyle } from "../shared/config";
+import { useClientData } from "../shared/client-data-context";
+import { tooltipStyle } from "../shared/config";
+import { useComputedData } from "../shared/use-computed";
+
+function MonitoringEmptyState() {
+  const { client } = useClientData();
+  const { avgPF } = useComputedData();
+
+  const cfeAnomalies = ["Factor de potencia", "Exceso de demanda", "Consumo en punta", "Variaciones de costo"];
+  const hardwareAnomalies = ["Distorsion armonica (THD)", "Desbalance de fases", "Sags/swells de voltaje", "Perfil de carga en tiempo real", "Factor de potencia instantaneo", "Transitorios electricos"];
+
+  return (
+    <div className="space-y-6">
+      {/* Hero card */}
+      <Card className="!p-0 overflow-hidden">
+        <div className="px-6 py-5 border-b border-nx-border bg-gradient-to-r from-nx-primary/5 to-nx-accent/5">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-xl bg-nx-primary/10 border border-nx-primary/20">
+              <Activity className="h-6 w-6 text-nx-primary" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-nx-text">
+                Monitoreo en tiempo real
+              </h2>
+              <p className="text-sm text-nx-text-muted mt-1 max-w-xl">
+                Tu diagnostico actual se basa en recibos de CFE. Con hardware de monitoreo instalado,
+                el sistema detecta problemas que los recibos no pueden ver y verifica el impacto real de cada solucion.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 py-5">
+          {/* Personalized insight */}
+          {avgPF > 0 && avgPF < 0.9 && (
+            <div className="rounded-lg bg-nx-warning/5 border border-nx-warning/20 px-4 py-3 mb-5">
+              <p className="text-sm text-nx-text">
+                <strong className="text-nx-warning">Dato especifico de tu planta:</strong>{" "}
+                Tu factor de potencia promedio es <strong>{avgPF.toFixed(2)}</strong>.
+                Con monitoreo en tiempo real, podemos identificar <em>exactamente cual equipo</em> genera
+                la potencia reactiva y optimizar la correccion, en vez de sobredimensionar el banco de capacitores.
+              </p>
+            </div>
+          )}
+
+          {/* Comparison table */}
+          <h3 className="text-sm font-medium text-nx-text-secondary mb-3">
+            Que detecta cada fuente de datos
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            {/* CFE column */}
+            <div className="rounded-lg border border-nx-border p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <BarChart3 className="h-4 w-4 text-nx-primary" />
+                <p className="text-xs font-semibold text-nx-primary">Solo recibos CFE</p>
+                <Badge variant="primary">Actual</Badge>
+              </div>
+              <ul className="space-y-2">
+                {cfeAnomalies.map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-xs text-nx-text-secondary">
+                    <ShieldCheck className="h-3.5 w-3.5 text-nx-accent flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[10px] text-nx-text-muted mt-3">
+                Datos bimestrales, precision estimada
+              </p>
+            </div>
+
+            {/* Hardware column */}
+            <div className="rounded-lg border border-nx-primary/30 bg-nx-primary/5 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="h-4 w-4 text-nx-accent" />
+                <p className="text-xs font-semibold text-nx-accent">CFE + Hardware</p>
+                <Badge variant="accent">Piloto</Badge>
+              </div>
+              <ul className="space-y-2">
+                {cfeAnomalies.map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-xs text-nx-text-secondary">
+                    <ShieldCheck className="h-3.5 w-3.5 text-nx-accent flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+                {hardwareAnomalies.map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-xs text-nx-text font-medium">
+                    <Zap className="h-3.5 w-3.5 text-nx-primary flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[10px] text-nx-text-muted mt-3">
+                Datos cada segundo, precision medida
+              </p>
+            </div>
+          </div>
+
+          {/* Benefits */}
+          <div className="mt-5 grid grid-cols-3 gap-3">
+            {[
+              { label: "Precision del diagnostico", cfe: "70%", hw: "95%+" },
+              { label: "Tiempo de deteccion", cfe: "2 meses", hw: "Instantaneo" },
+              { label: "Verificacion de ahorros", cfe: "No posible", hw: "En tiempo real" },
+            ].map((row) => (
+              <div key={row.label} className="rounded-lg bg-nx-surface/50 border border-nx-border p-3 text-center">
+                <p className="text-[10px] text-nx-text-muted uppercase tracking-wider">{row.label}</p>
+                <p className="text-xs text-nx-text-secondary mt-1 line-through">{row.cfe}</p>
+                <p className="text-sm font-semibold text-nx-accent mt-0.5">{row.hw}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className="mt-5 rounded-lg bg-nx-accent/10 border border-nx-accent/20 px-4 py-4 text-center">
+            <p className="text-sm font-medium text-nx-text mb-1">
+              Solicita un piloto de monitoreo
+            </p>
+            <p className="text-xs text-nx-text-muted mb-3">
+              Instalamos sensores en tu tablero principal por 30 dias. Sin costo si contratas el servicio despues.
+            </p>
+            <a
+              href="mailto:contacto@nexvolt.mx?subject=Solicitud%20de%20piloto%20de%20monitoreo&body=Me%20interesa%20un%20piloto%20de%20monitoreo%20para%20mi%20planta."
+              className="inline-flex items-center gap-2 rounded-lg bg-nx-accent text-white px-6 py-2.5 text-sm font-medium hover:bg-nx-accent/90 transition-colors"
+            >
+              <Activity className="h-4 w-4" />
+              Solicitar piloto
+            </a>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
 
 export function MonitoringSection() {
+  const { client } = useClientData();
+
   const devices = client.monitoring_devices;
+
+  // Show hardware value proposition if no devices
+  if (!devices || devices.length === 0) {
+    return <MonitoringEmptyState />;
+  }
+
   const r = devices[0].last_reading;
   const onlineCount = devices.filter((d) => d.status === "online").length;
 

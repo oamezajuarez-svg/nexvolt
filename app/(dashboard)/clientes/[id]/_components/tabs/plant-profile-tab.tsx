@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatNumber } from "@/lib/utils";
 import { mockPlantProfile } from "@/lib/mock-plant-profile";
 import { CONUEE_DIAGNOSTIC_SECTIONS } from "@/lib/standards/efficiency";
-import { client } from "../shared/config";
+import { useClientData } from "../shared/client-data-context";
 import {
   Building2,
   Clock,
@@ -40,12 +40,14 @@ const areaSegments = [
   },
 ];
 
-const utilizationPct =
-  plant.transformer_capacity_kva > 0
-    ? (client.contracted_demand_kw / plant.transformer_capacity_kva) * 100
-    : 0;
-
 export function PlantProfileSection() {
+  const { client } = useClientData();
+
+  const utilizationPct =
+    plant.transformer_capacity_kva > 0
+      ? (client.contracted_demand_kw / plant.transformer_capacity_kva) * 100
+      : 0;
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

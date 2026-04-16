@@ -12,7 +12,8 @@ import {
   calculateEnergyIntensity,
 } from "@/lib/calculations/energy-balance";
 import { ENERGY_INTENSITY_BENCHMARKS } from "@/lib/standards/efficiency";
-import { client, tooltipStyle } from "../shared/config";
+import { useClientData } from "../shared/client-data-context";
+import { tooltipStyle } from "../shared/config";
 import {
   PieChart,
   Pie,
@@ -36,9 +37,11 @@ const categoryColors: Record<string, string> = {
 };
 
 export function EnergyBalanceSection() {
+  const { client } = useClientData();
+
   const balance = useMemo(
     () => calculateEnergyBalance(mockEquipment, client.invoices),
-    []
+    [client.invoices]
   );
 
   const intensity = useMemo(

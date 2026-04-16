@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/layout/logo";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +11,7 @@ import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,19 +22,23 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    // TODO: Replace with Supabase auth
-    try {
-      await new Promise((r) => setTimeout(r, 800));
-      if (email && password) {
-        router.push("/dashboard");
-      } else {
-        setError("Ingresa email y contraseña");
-      }
-    } catch {
-      setError("Error al iniciar sesión");
-    } finally {
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) {
+      setError(
+        authError.message === "Invalid login credentials"
+          ? "Email o contraseña incorrectos"
+          : authError.message
+      );
       setLoading(false);
+      return;
     }
+
+    router.refresh();
+    router.push("/dashboard");
   };
 
   return (
@@ -50,9 +57,9 @@ export default function LoginPage() {
         {/* Card */}
         <div className="rounded-xl border border-nx-border bg-nx-card/80 backdrop-blur-sm p-8">
           <div className="mb-6">
-            <h1 className="text-lg font-semibold text-nx-text">Iniciar sesión</h1>
+            <h1 className="text-lg font-semibold text-nx-text">Iniciar sesion</h1>
             <p className="text-sm text-nx-text-muted mt-1">
-              Accede a tu plataforma de gestión energética
+              Accede a tu plataforma de gestion energetica
             </p>
           </div>
 
@@ -89,14 +96,26 @@ export default function LoginPage() {
                   Ingresando...
                 </>
               ) : (
-                "Iniciar sesión"
+                "Iniciar sesion"
               )}
             </Button>
           </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-nx-text-muted">
+              ¿No tienes cuenta?{" "}
+              <Link
+                href="/registro"
+                className="text-nx-primary hover:text-nx-primary/80 font-medium transition-colors"
+              >
+                Crear cuenta
+              </Link>
+            </p>
+          </div>
         </div>
 
         <p className="text-center text-xs text-nx-text-muted mt-6">
-          Nexvolt — Gestión Energética Inteligente
+          Nexvolt — Gestion Energetica Inteligente
         </p>
       </div>
     </div>
