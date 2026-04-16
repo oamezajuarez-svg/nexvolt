@@ -21,9 +21,12 @@ import {
 import { useClientData } from "../shared/client-data-context";
 import { useComputedData } from "../shared/use-computed";
 import { tooltipStyle } from "../shared/config";
+import { CFEUpload } from "@/components/cfe-upload";
+import { useRouter } from "next/navigation";
 
 export function CFESection() {
-  const { client } = useClientData();
+  const { client, orgId } = useClientData();
+  const router = useRouter();
   const {
     consumptionBreakdown,
     demandData,
@@ -56,6 +59,11 @@ export function CFESection() {
           {client.invoices.length}/12 meses
         </Badge>
       </div>
+
+      {/* Upload CFE bills */}
+      {orgId !== "demo" && (
+        <CFEUpload orgId={orgId} onSaved={() => router.refresh()} />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Consumo por periodo */}

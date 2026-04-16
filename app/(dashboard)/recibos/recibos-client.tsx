@@ -1,30 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
-  Upload,
-  FileText,
   Loader2,
-  CheckCircle2,
   AlertCircle,
   Trash2,
   Zap,
-  X,
+  Building2,
 } from "lucide-react";
-import { extractCFEInvoice, saveInvoice } from "@/lib/actions/extract-cfe";
+import { CFEUpload } from "@/components/cfe-upload";
 import { getInvoicesByOrg, deleteInvoice } from "@/lib/actions/invoices";
-import type { ExtractedInvoice } from "@/lib/actions/extract-cfe";
-
-interface UploadedInvoice {
-  id?: string;
-  fileName: string;
-  status: "extracting" | "review" | "saved" | "error";
-  extracted?: ExtractedInvoice;
-  error?: string;
-}
+import { createOrganizationForUser } from "@/lib/actions/auth";
 
 interface SavedInvoice {
   id: string;
@@ -43,92 +34,39 @@ function formatCurrency(n: number | null) {
 }
 
 export function RecibosClient({
-  orgId,
+  orgId: initialOrgId,
   initialInvoices,
 }: {
   orgId: string | null;
   initialInvoices: SavedInvoice[];
 }) {
-  const [uploads, setUploads] = useState<UploadedInvoice[]>([]);
+  const router = useRouter();
+  const [orgId, setOrgId] = useState(initialOrgId);
   const [savedInvoices, setSavedInvoices] = useState<SavedInvoice[]>(initialInvoices);
-  const [dragOver, setDragOver] = useState(false);
 
-  if (!orgId) {
-    return (
-      <div className="p-8">
-        <Card className="text-center py-12">
-          <AlertCircle className="h-12 w-12 text-nx-warning mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-nx-text mb-2">
-            Sin organizacion vinculada
-          </h2>
-          <p className="text-sm text-nx-text-muted">
-            Tu cuenta no esta vinculada a una empresa. Contacta al administrador.
-          </p>
-        </Card>
-      </div>
-    );
-  }
+  // Org creation state
+  const [companyName, setCompanyName] = useState("");
+  const [creatingOrg, setCreatingOrg] = useState(false);
+  const [orgError, setOrgError] = useState<string | null>(null);
 
-  const handleFiles = async (files: FileList | File[]) => {
-    const fileArray = Array.from(files);
+  const handleCreateOrg = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!companyName.trim()) return;
+    setCreatingOrg(true);
+    setOrgError(null);
 
-    for (const file of fileArray) {
-      const upload: UploadedInvoice = {
-        fileName: file.name,
-        status: "extracting",
-      };
-
-      setUploads((prev) => [...prev, upload]);
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const result = await extractCFEInvoice(formData);
-
-      if (result.error || !result.data) {
-        setUploads((prev) =>
-          prev.map((u) =>
-            u.fileName === file.name
-              ? { ...u, status: "error", error: result.error }
-              : u
-          )
-        );
-        continue;
-      }
-
-      setUploads((prev) =>
-        prev.map((u) =>
-          u.fileName === file.name
-            ? { ...u, status: "review", extracted: result.data }
-            : u
-        )
-      );
-    }
-  };
-
-  const handleSave = async (upload: UploadedInvoice) => {
-    if (!upload.extracted) return;
-
-    const result = await saveInvoice(orgId, upload.extracted);
-
+    const result = await createOrganizationForUser(companyName.trim());
     if (result.error) {
-      setUploads((prev) =>
-        prev.map((u) =>
-          u.fileName === upload.fileName
-            ? { ...u, status: "error", error: result.error }
-            : u
-        )
-      );
+      setOrgError(result.error);
+      setCreatingOrg(false);
       return;
     }
+    setOrgId(result.orgId!);
+    setCreatingOrg(false);
+  };
 
-    setUploads((prev) =>
-      prev.map((u) =>
-        u.fileName === upload.fileName ? { ...u, status: "saved", id: result.id } : u
-      )
-    );
-
-    // Refresh saved invoices
+  const refreshInvoices = async () => {
+    if (!orgId) return;
     const invResult = await getInvoicesByOrg(orgId);
     if (invResult.data) {
       setSavedInvoices(
@@ -147,24 +85,59 @@ export function RecibosClient({
     setSavedInvoices((prev) => prev.filter((inv) => inv.id !== invoiceId));
   };
 
-  const handleDismiss = (fileName: string) => {
-    setUploads((prev) => prev.filter((u) => u.fileName !== fileName));
-  };
+  // No org -- show creation form
+  if (!orgId) {
+    return (
+      <div className="p-8">
+        <div className="max-w-md mx-auto mt-12">
+          <Card className="!p-8">
+            <div className="text-center mb-6">
+              <Building2 className="h-12 w-12 text-nx-primary mx-auto mb-4" />
+              <h2 className="text-lg font-semibold text-nx-text">
+                Configura tu empresa
+              </h2>
+              <p className="text-sm text-nx-text-muted mt-1">
+                Para empezar tu diagnostico energetico, necesitamos el nombre de tu empresa
+              </p>
+            </div>
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    if (e.dataTransfer.files.length > 0) {
-      handleFiles(e.dataTransfer.files);
-    }
-  };
+            <form onSubmit={handleCreateOrg} className="space-y-4">
+              <Input
+                id="company"
+                label="Nombre de tu empresa"
+                type="text"
+                placeholder="Industrias del Norte SA"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleFiles(e.target.files);
-      e.target.value = "";
-    }
-  };
+              {orgError && (
+                <div className="rounded-lg bg-nx-danger-bg border border-nx-danger/20 px-4 py-2.5">
+                  <p className="text-sm text-nx-danger">{orgError}</p>
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={creatingOrg || !companyName.trim()}
+                className="w-full"
+                size="lg"
+              >
+                {creatingOrg ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Creando...
+                  </>
+                ) : (
+                  "Continuar"
+                )}
+              </Button>
+            </form>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 space-y-6">
@@ -201,158 +174,8 @@ export function RecibosClient({
         </div>
       </Card>
 
-      {/* Upload area */}
-      <Card
-        className={`!p-0 overflow-hidden transition-colors ${
-          dragOver ? "border-nx-primary bg-nx-primary/5" : ""
-        }`}
-      >
-        <label
-          className="flex flex-col items-center justify-center py-12 px-8 cursor-pointer"
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragOver(true);
-          }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
-        >
-          <input
-            type="file"
-            accept=".pdf,image/png,image/jpeg"
-            multiple
-            className="hidden"
-            onChange={handleInputChange}
-          />
-          <Upload
-            className={`h-10 w-10 mb-4 transition-colors ${
-              dragOver ? "text-nx-primary" : "text-nx-text-muted"
-            }`}
-          />
-          <p className="text-sm font-medium text-nx-text mb-1">
-            Arrastra tus recibos de CFE aqui
-          </p>
-          <p className="text-xs text-nx-text-muted mb-4">
-            o haz click para seleccionar archivos (PDF, PNG, JPG)
-          </p>
-          <p className="text-xs text-nx-text-muted">
-            Puedes subir varios recibos a la vez
-          </p>
-        </label>
-      </Card>
-
-      {/* Upload queue */}
-      {uploads.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-medium text-nx-text-secondary">Procesando</h2>
-          {uploads.map((upload) => (
-            <Card key={upload.fileName} className="!p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-nx-text-muted flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-nx-text">{upload.fileName}</p>
-                    {upload.status === "extracting" && (
-                      <p className="text-xs text-nx-primary flex items-center gap-1 mt-0.5">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        Extrayendo datos con IA...
-                      </p>
-                    )}
-                    {upload.status === "error" && (
-                      <p className="text-xs text-nx-danger mt-0.5">{upload.error}</p>
-                    )}
-                    {upload.status === "saved" && (
-                      <p className="text-xs text-nx-accent flex items-center gap-1 mt-0.5">
-                        <CheckCircle2 className="h-3 w-3" />
-                        Guardado
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {(upload.status === "error" || upload.status === "saved") && (
-                  <button
-                    onClick={() => handleDismiss(upload.fileName)}
-                    className="text-nx-text-muted hover:text-nx-text transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Extracted data review */}
-              {upload.status === "review" && upload.extracted && (
-                <div className="border-t border-nx-border pt-3 mt-3">
-                  <p className="text-xs font-medium text-nx-text-secondary mb-3">
-                    Datos extraidos — verifica y confirma
-                  </p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                    <div className="rounded-lg bg-nx-surface/50 p-2.5">
-                      <p className="text-[10px] text-nx-text-muted uppercase tracking-wider">Periodo</p>
-                      <p className="text-sm font-semibold text-nx-text mt-0.5">
-                        {upload.extracted.period || "—"}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-nx-surface/50 p-2.5">
-                      <p className="text-[10px] text-nx-text-muted uppercase tracking-wider">Total kWh</p>
-                      <p className="text-sm font-semibold text-nx-text mt-0.5">
-                        {upload.extracted.total_kwh?.toLocaleString() ?? "—"}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-nx-surface/50 p-2.5">
-                      <p className="text-[10px] text-nx-text-muted uppercase tracking-wider">Demanda max</p>
-                      <p className="text-sm font-semibold text-nx-text mt-0.5">
-                        {upload.extracted.demand_max_kw ?? "—"} kW
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-nx-surface/50 p-2.5">
-                      <p className="text-[10px] text-nx-text-muted uppercase tracking-wider">Factor potencia</p>
-                      <p className="text-sm font-semibold text-nx-text mt-0.5">
-                        {upload.extracted.power_factor ?? "—"}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-nx-surface/50 p-2.5">
-                      <p className="text-[10px] text-nx-text-muted uppercase tracking-wider">Cargo energia</p>
-                      <p className="text-sm font-semibold text-nx-text mt-0.5">
-                        {formatCurrency(upload.extracted.cost_energy)}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-nx-surface/50 p-2.5">
-                      <p className="text-[10px] text-nx-text-muted uppercase tracking-wider">Cargo FP</p>
-                      <p className="text-sm font-semibold text-nx-text mt-0.5">
-                        {formatCurrency(upload.extracted.cost_power_factor)}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-nx-surface/50 p-2.5">
-                      <p className="text-[10px] text-nx-text-muted uppercase tracking-wider">Tarifa</p>
-                      <p className="text-sm font-semibold text-nx-text mt-0.5">
-                        {upload.extracted.tariff ?? "—"}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-nx-primary/5 border border-nx-primary/20 p-2.5">
-                      <p className="text-[10px] text-nx-primary uppercase tracking-wider font-medium">Total</p>
-                      <p className="text-sm font-bold text-nx-primary mt-0.5">
-                        {formatCurrency(upload.extracted.total_cost)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => handleSave(upload)}>
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      Confirmar y guardar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDismiss(upload.fileName)}
-                    >
-                      Descartar
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </Card>
-          ))}
-        </div>
-      )}
+      {/* Upload component */}
+      <CFEUpload orgId={orgId} onSaved={refreshInvoices} />
 
       {/* Saved invoices table */}
       {savedInvoices.length > 0 && (
@@ -364,17 +187,10 @@ export function RecibosClient({
             <table className="w-full">
               <thead>
                 <tr className="border-b border-nx-border bg-nx-surface/30">
-                  <th className="text-left px-4 py-2.5 text-xs font-medium text-nx-text-muted">
-                    Periodo
-                  </th>
-                  <th className="text-right px-4 py-2.5 text-xs font-medium text-nx-text-muted">
-                    Consumo (kWh)
-                  </th>
-                  <th className="text-right px-4 py-2.5 text-xs font-medium text-nx-text-muted">
-                    Total
-                  </th>
-                  <th className="text-right px-4 py-2.5 text-xs font-medium text-nx-text-muted w-10">
-                  </th>
+                  <th className="text-left px-4 py-2.5 text-xs font-medium text-nx-text-muted">Periodo</th>
+                  <th className="text-right px-4 py-2.5 text-xs font-medium text-nx-text-muted">Consumo (kWh)</th>
+                  <th className="text-right px-4 py-2.5 text-xs font-medium text-nx-text-muted">Total</th>
+                  <th className="text-right px-4 py-2.5 text-xs font-medium text-nx-text-muted w-10"></th>
                 </tr>
               </thead>
               <tbody>
@@ -391,7 +207,6 @@ export function RecibosClient({
                       <button
                         onClick={() => handleDelete(inv.id)}
                         className="text-nx-text-muted hover:text-nx-danger transition-colors p-1"
-                        title="Eliminar recibo"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -404,7 +219,7 @@ export function RecibosClient({
         </div>
       )}
 
-      {/* Next step CTA */}
+      {/* CTA */}
       {savedInvoices.length >= 6 && (
         <Card className="!p-6 border-nx-accent/30 bg-nx-accent/5">
           <div className="flex items-center justify-between">
@@ -413,17 +228,11 @@ export function RecibosClient({
                 Datos suficientes para el analisis
               </h3>
               <p className="text-xs text-nx-text-muted">
-                Con {savedInvoices.length} recibos cargados, el sistema puede generar tu diagnostico energetico completo.
+                Con {savedInvoices.length} recibos cargados, el sistema puede generar tu diagnostico completo.
               </p>
             </div>
-            <Button
-              size="lg"
-              onClick={() => {
-                window.location.href = `/clientes/${orgId}`;
-              }}
-            >
-              <Zap className="h-4 w-4" />
-              Ver mi diagnostico
+            <Button size="lg" onClick={() => { window.location.href = `/clientes/${orgId}`; }}>
+              <Zap className="h-4 w-4" /> Ver mi diagnostico
             </Button>
           </div>
         </Card>
