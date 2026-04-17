@@ -2,13 +2,18 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { mockClientDetail } from "@/lib/mock-client-detail";
 import type { ClientDetail, CFEInvoice, Anomaly, ProposedSolution, MonitoringDevice } from "@/lib/types";
 
-const DEMO_ORG_ID = "demo";
+// UUIDs are 36 chars with dashes. Anything else is a demo/mock ID.
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isDemoId(id: string): boolean {
+  return id === "demo" || !UUID_REGEX.test(id);
+}
 
 export async function fetchClientDetail(
   orgId: string
 ): Promise<ClientDetail | null> {
-  // Demo mode -- return mock data
-  if (orgId === DEMO_ORG_ID) {
+  // Demo mode -- return mock data for non-UUID IDs
+  if (isDemoId(orgId)) {
     return mockClientDetail;
   }
 
