@@ -6,16 +6,17 @@ import { useTheme } from "@/lib/theme-context";
 import {
   ArrowRight,
   Zap,
-  FileText,
-  BarChart3,
-  Shield,
-  Clock,
-  TrendingDown,
-  CheckCircle2,
   Upload,
+  BarChart3,
+  TrendingDown,
+  FileText,
+  Shield,
+  CheckCircle2,
+  Clock,
   Moon,
   Sun,
   Palette,
+  Eye,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -26,7 +27,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-nx-bg bg-grid">
-      {/* ── Top nav ── */}
+      {/* ── Nav ── */}
       <nav className="sticky top-0 z-40 border-b border-nx-border/50 bg-nx-bg/60 backdrop-blur-xl">
         <div className="mx-auto max-w-6xl flex items-center justify-between h-16 px-6">
           <Logo size="md" />
@@ -44,10 +45,10 @@ export default function HomePage() {
               Iniciar sesion
             </Link>
             <Link
-              href="/registro"
+              href="/demo"
               className="rounded-lg bg-nx-primary px-4 py-2 text-sm font-medium text-white hover:bg-nx-primary-dim transition-colors"
             >
-              Diagnostico gratis
+              Ver demo
             </Link>
           </div>
         </div>
@@ -65,36 +66,30 @@ export default function HomePage() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1]">
-            <span className="text-nx-text">Sube tus recibos de CFE.</span>
+            <span className="text-nx-text">Tu planta esta pagando de mas.</span>
             <br />
             <span className="bg-gradient-to-r from-nx-primary via-nx-accent to-nx-primary bg-clip-text text-transparent">
-              Recibe tu diagnostico en minutos.
+              Te mostramos cuanto.
             </span>
           </h1>
 
           <p className="mt-6 text-lg text-nx-text-secondary max-w-2xl mx-auto leading-relaxed">
-            Con solo <strong className="text-nx-text">6 recibos bimestrales de CFE</strong>, nuestro motor de IA analiza
-            tu consumo, detecta anomalias y genera soluciones con ROI calculado. Sin instalar nada.
+            Mira un ejemplo real de diagnostico energetico. Despues sube <strong className="text-nx-text">6 recibos bimestrales de CFE</strong> y
+            obtendras el mismo analisis para tu planta. En minutos. Sin instalar nada.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/registro"
+              href="/demo"
               className="inline-flex items-center gap-2 rounded-xl bg-nx-primary px-8 py-4 text-base font-semibold text-white hover:bg-nx-primary-dim transition-colors glow-primary"
             >
-              Comenzar diagnostico gratis
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-            <Link
-              href="/clientes/1"
-              className="inline-flex items-center gap-2 rounded-xl border border-nx-border bg-nx-card px-8 py-4 text-base font-semibold text-nx-text hover:bg-nx-surface transition-colors"
-            >
-              Ver ejemplo real
+              <Eye className="h-5 w-5" />
+              Ver diagnostico ejemplo
             </Link>
           </div>
 
           <p className="mt-4 text-xs text-nx-text-muted">
-            Sin costo. Sin tarjeta de credito. Resultados inmediatos.
+            Sin registro. Sin costo. Ve exactamente lo que obtendras.
           </p>
         </div>
       </section>
@@ -102,25 +97,25 @@ export default function HomePage() {
       {/* ── How it works ── */}
       <section className="mx-auto max-w-5xl px-6 pb-20">
         <h2 className="text-center text-sm font-semibold text-nx-text-muted uppercase tracking-wider mb-10">
-          Como funciona
+          Asi funciona
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
               step: "1",
-              icon: Upload,
-              title: "Sube tus recibos",
-              description: "Arrastra los PDF de tus ultimos 6 recibos bimestrales de CFE. La IA extrae automaticamente los 20+ campos de cada recibo.",
+              icon: Eye,
+              title: "Ve un ejemplo real",
+              description: "Explora el diagnostico completo de una planta industrial: anomalias detectadas, soluciones con ROI, simulador de ahorros.",
               color: "text-nx-primary",
               bg: "bg-nx-primary/10",
               border: "border-nx-primary/20",
             },
             {
               step: "2",
-              icon: BarChart3,
-              title: "Analisis automatico",
-              description: "El motor detecta anomalias: factor de potencia bajo, excesos de demanda, consumo en horario punta, desperdicios de energia.",
+              icon: Upload,
+              title: "Sube tus 6 recibos",
+              description: "Arrastra los PDFs de tus recibos bimestrales de CFE. La IA extrae automaticamente todos los datos en segundos.",
               color: "text-nx-accent",
               bg: "bg-nx-accent/10",
               border: "border-nx-accent/20",
@@ -128,8 +123,8 @@ export default function HomePage() {
             {
               step: "3",
               icon: TrendingDown,
-              title: "Soluciones con ROI",
-              description: "Recibe recomendaciones a la medida: banco de capacitores, solar, almacenamiento, LED. Cada una con inversion, ahorro mensual y retorno.",
+              title: "Recibe TU diagnostico",
+              description: "Mismo nivel de analisis, pero con los datos de tu planta. Anomalias reales, soluciones a la medida, retorno calculado.",
               color: "text-amber-400",
               bg: "bg-amber-400/10",
               border: "border-amber-400/20",
@@ -156,20 +151,20 @@ export default function HomePage() {
       <section className="border-t border-nx-border bg-nx-surface/20">
         <div className="mx-auto max-w-5xl px-6 py-20">
           <h2 className="text-center text-2xl font-bold text-nx-text mb-3">
-            Que incluye tu diagnostico
+            Que detecta el diagnostico
           </h2>
           <p className="text-center text-sm text-nx-text-muted mb-12 max-w-lg mx-auto">
-            Todo basado en normas mexicanas (CONUEE, NOM, SEMARNAT) y estandares internacionales (ASHRAE, IEEE, LEED, ISO 50001)
+            Basado en CONUEE, NOM, SEMARNAT, ASHRAE, IEEE, LEED e ISO 50001
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { icon: FileText, title: "Analisis de 20+ variables por recibo", desc: "Consumo por periodo horario, demanda, factor de potencia, desglose de costos" },
-              { icon: Shield, title: "Deteccion de anomalias", desc: "Factor de potencia bajo, excesos de demanda, picos de consumo, errores de facturacion" },
-              { icon: TrendingDown, title: "Soluciones con ROI real", desc: "Capacitores, solar, almacenamiento, LED, migracion MEM. Inversion y retorno calculados" },
-              { icon: BarChart3, title: "Simulador de escenarios", desc: "Compara costos actuales vs. implementar 1, 2 o 3 soluciones combinadas" },
+              { icon: FileText, title: "20+ variables por recibo", desc: "Consumo por periodo horario, demanda, factor de potencia, desglose completo de costos" },
+              { icon: Shield, title: "Anomalias automaticas", desc: "Factor de potencia bajo, excesos de demanda, picos en punta, desperdicios, errores de facturacion" },
+              { icon: TrendingDown, title: "Soluciones con ROI", desc: "Capacitores, solar, almacenamiento, LED, MEM. Cada una con inversion y retorno calculado" },
+              { icon: BarChart3, title: "Simulador de escenarios", desc: "Compara tu factura actual vs. implementar 1, 2 o 3 soluciones combinadas" },
               { icon: CheckCircle2, title: "Ruta a certificaciones", desc: "Avance hacia CONUEE, LEED v4.1, ISO 50001. Beneficios fiscales Art. 34 LISR" },
-              { icon: Clock, title: "Resultados en minutos", desc: "No semanas de consultoria. Sube los PDF, confirma los datos, ejecuta el analisis" },
+              { icon: Clock, title: "Resultados en minutos", desc: "No semanas de consultoria. Sube los PDF, la IA hace el resto" },
             ].map((item) => (
               <div key={item.title} className="rounded-xl border border-nx-border bg-nx-card p-5 hover:border-nx-border-hover transition-colors">
                 <item.icon className="h-5 w-5 text-nx-primary mb-3" />
@@ -186,24 +181,19 @@ export default function HomePage() {
         <div className="rounded-2xl border border-nx-primary/20 bg-gradient-to-b from-nx-primary/5 to-transparent p-10">
           <Zap className="h-10 w-10 text-nx-primary mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-nx-text mb-3">
-            Conoce cuanto esta perdiendo tu planta
+            La mayoria de las plantas pagan entre 8% y 25% de mas
           </h2>
           <p className="text-sm text-nx-text-muted mb-8 max-w-md mx-auto">
-            La mayoria de las plantas industriales en Mexico pagan entre 8% y 25% de mas en su factura electrica.
-            Descubrelo en minutos con tus propios datos.
+            Primero ve lo que nuestro sistema detecta en una planta ejemplo.
+            Despues decide si quieres verlo con tus propios datos.
           </p>
           <Link
-            href="/registro"
+            href="/demo"
             className="inline-flex items-center gap-2 rounded-xl bg-nx-primary px-8 py-4 text-base font-semibold text-white hover:bg-nx-primary-dim transition-colors glow-primary"
           >
-            Subir mis recibos de CFE
-            <ArrowRight className="h-5 w-5" />
+            <Eye className="h-5 w-5" />
+            Ver diagnostico ejemplo
           </Link>
-          <div className="mt-6 flex items-center justify-center gap-6 text-xs text-nx-text-muted">
-            <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-nx-accent" /> Gratis</span>
-            <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-nx-accent" /> Sin instalar nada</span>
-            <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-nx-accent" /> Resultados inmediatos</span>
-          </div>
         </div>
       </section>
 
@@ -213,14 +203,9 @@ export default function HomePage() {
           <p className="text-xs text-nx-text-muted">
             Nexvolt — Diagnostico energetico inteligente para la industria mexicana
           </p>
-          <div className="flex items-center gap-4">
-            <Link href="/clientes/1" className="text-xs text-nx-text-muted hover:text-nx-text transition-colors">
-              Ver demo
-            </Link>
-            <Link href="/login" className="text-xs text-nx-text-muted hover:text-nx-text transition-colors">
-              Iniciar sesion
-            </Link>
-          </div>
+          <Link href="/login" className="text-xs text-nx-text-muted hover:text-nx-text transition-colors">
+            Iniciar sesion
+          </Link>
         </div>
       </footer>
     </div>

@@ -38,7 +38,7 @@ export default function LoginPage() {
     }
 
     router.refresh();
-    router.push("/recibos");
+    router.push("/onboarding");
   };
 
   return (
