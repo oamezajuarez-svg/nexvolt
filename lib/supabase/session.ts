@@ -51,10 +51,10 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // If logged in and on login/signup page, redirect to dashboard
+  // If logged in and on login/signup page, redirect to recibos (the main action)
   if (user && (pathname === "/login" || pathname === "/registro")) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = "/recibos";
     return NextResponse.redirect(url);
   }
 

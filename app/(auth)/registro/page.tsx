@@ -61,7 +61,7 @@ export default function SignupPage() {
     if (authData.session) {
       await createOrganizationForUser(companyName);
       router.refresh();
-      router.push("/dashboard");
+      router.push("/recibos");
       return;
     }
 
